@@ -4,7 +4,7 @@ import { buildDependencyGraph } from './'
 
 const basicProjectTsConfigFilePath = path.resolve(
   __dirname,
-  './test-fixtures/basic-project/tsconfig.json',
+  './__test-fixtures/basic-project/tsconfig.json',
 )
 
 // TODO:

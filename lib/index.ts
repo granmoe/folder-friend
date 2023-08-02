@@ -1,4 +1,4 @@
-import { Project, SourceFile } from 'ts-morph'
+import { Project } from 'ts-morph'
 import { ChatMessage } from './types'
 
 type ProjectOrTsConfigPath =
@@ -19,23 +19,12 @@ export const localizeInternalDependencies = (
 
   /*
     1. Build dep graph
-    2. Localize any stray internal dependencies
-      a. Process all files in dep graph that have only one dep
-      b. Remove the file from the dep graph
-      c. Keep going until the dep graph is empty
-    3. Update imports
-    4. Write project
+    2. Get file moves from OpenAI
+    3. Move files
+    4. Update imports (need to add this to prompt)
+    5. Write project
 
-    a -> b -> c
-    (C depends on B, B depends on A)
-    In this case, we need to process A first, then B, then C
-    dep graph would look like this:
-    A -> []
-    B -> [A]
-    C -> [B]
-
-    Remove A from the graph since it has no dependencies
-    (This means we also remove A from B's dependencies)
+    Also need to validate
   */
 }
 
@@ -49,52 +38,14 @@ export const buildDependencyGraph = (
 
   const files = project.getSourceFiles()
   for (const file of files) {
-    const fileId = getFileId(file)
     const dependents = file.getReferencingSourceFiles()
 
-    dependencyGraph[fileId] = dependents.map((dep) => getFileId(dep))
+    dependencyGraph[file.getFilePath()] = dependents.map((dep) =>
+      dep.getFilePath(),
+    )
   }
 
   return dependencyGraph
-}
-
-export const findStrayInternalDependencies = (
-  projectInfo: ProjectOrTsConfigPath = { tsConfigFilePath: 'tsconfig.json' },
-) => {
-  const project =
-    projectInfo.project ?? getProject(projectInfo.tsConfigFilePath)
-  const files = project.getSourceFiles()
-
-  let dir: any
-
-  for (const file of files) {
-    // console.log(file.getFilePath())
-    // console.log('Dir path: ', file.getDirectoryPath())
-
-    const _exports = file.getExportSymbols()
-
-    for (const _export of _exports) {
-      // console.log(_export.getFullyQualifiedName())
-    }
-
-    if (file.getFilePath().includes('helper') && dir) {
-      file.moveToDirectory(dir)
-
-      const referencingFiles = file.getReferencingSourceFiles()
-
-      referencingFiles.forEach((file) => {
-        file.getImportDeclarations().forEach((importDeclaration) => {
-          if (importDeclaration.getModuleSpecifierSourceFile() === file) {
-            importDeclaration.setModuleSpecifier(file.getFilePath())
-          }
-        })
-      })
-    } else {
-      dir = file.getDirectory()
-    }
-  }
-
-  return ['hi']
 }
 
 export const printProject = (
@@ -130,26 +81,6 @@ const getProject = (tsConfigFilePath: string) => {
   return project
 }
 
-const sourceFileToFileId = new Map<SourceFile, string>()
-const fileIdToSourceFile = new Map<string, SourceFile>()
-
-const getFileId = (sourceFile: SourceFile) => {
-  let id = sourceFileToFileId.get(sourceFile)
-  if (id) {
-    return id
-  }
-
-  const filepath = sourceFile.getFilePath()
-  sourceFileToFileId.set(sourceFile, filepath)
-  fileIdToSourceFile.set(filepath, sourceFile)
-
-  return filepath
-}
-
-const getSourceFileById = (id: string) => {
-  return fileIdToSourceFile.get(id)
-}
-
 const buildPrompt = (dependencyGraph: { [fileId: string]: string[] }) => {
   const messages: ChatMessage[] = [
     {
@@ -158,7 +89,7 @@ const buildPrompt = (dependencyGraph: { [fileId: string]: string[] }) => {
     },
     {
       role: 'user',
-      content: dependencyGraph,
+      content: JSON.stringify(dependencyGraph),
     },
   ]
 }
