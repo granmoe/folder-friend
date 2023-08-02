@@ -1,3 +1,28 @@
+# GPT version
+
+## Launch
+
+- Build dep graph
+  - Test
+- Call OpenAI
+  - Use forced function calling + Zod
+  - Mock in tests
+- Ignore instructions that operate on files outside of TS project
+  - Test
+- Execute instructions
+- Build and test locally somehow on some various repos
+- Get tsconfig recursively
+- Need to support running only in current directory
+
+## Post-Launch
+
+- E2E test?
+- Support optional CLI arg to pass OpenAI key
+
+---
+
+# Old
+
 localizeInternalDependencies
 
 - Setup project

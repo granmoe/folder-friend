@@ -1,57 +1,72 @@
 import { expect, test } from 'vitest'
 import path from 'path'
-import {
-  buildDependencyGraph,
-  findStrayInternalDependencies,
-  printProject,
-} from './'
+import { buildDependencyGraph } from './'
 
 const basicProjectTsConfigFilePath = path.resolve(
   __dirname,
   './test-fixtures/basic-project/tsconfig.json',
 )
+
 // TODO:
 // * Check imports are correct in one test
 // * Check file tree is correct in one test
 // * Check various problem cases: circular files, etc.
 
 test('buildDependencyGraph()', () => {
-  const { dependencyGraph, dependentsCount } = buildDependencyGraph({
+  const dependencyGraph = buildDependencyGraph({
     tsConfigFilePath: basicProjectTsConfigFilePath,
   })
 
   console.log(dependencyGraph)
-  console.log(dependentsCount)
 
   // expect(dependencyGraph.size).toBe(4)
   // expect(dependentsCount.size).toBe(4)
 })
 
-test.skip('findStrayInternalDependencies()', () => {
-  const tsConfigFilePath = path.resolve(
-    __dirname,
-    './test-fixtures/basic-project/tsconfig.json',
-  )
+/*
+a/
+  b.ts
+index.ts
+c.ts
+d.ts
+e.ts
+f.ts
 
-  console.log(printProject({ tsConfigFilePath }))
+common/
+  c.ts
+d/
+  index.ts
+  e.ts
+  f.ts
+b.ts
 
-  const orphanedDependencies = findStrayInternalDependencies({
-    tsConfigFilePath,
-  })
+index.tsx
+components/
+  header.tsx
+  footer.tsx
+sidebar.tsx
+footer-button.tsx
+hooks/
+  use-auth.ts
 
-  console.log(printProject({ tsConfigFilePath }))
-
-  expect(orphanedDependencies.length).toBe(1)
-})
-
-const test = {
-  'index.ts': {
-    imports: ['a/b.ts', 'c.ts', 'd.ts'],
+{
+  "index.ts": {
+    imports: ["header.tsx", "footer.tsx", "sidebar.tsx"]
   },
-  'b.ts': {
-    imports: ['c.ts'],
+  "components/header.tsx": {
+    imports: ["use-auth.ts"]
   },
-  'd.ts': {
-    imports: ['e.ts', 'f.ts'],
+  "components/footer.tsx": {
+    imports: ["footer-button.tsx"]
   },
+  "sidebar.tsx": {
+    imports: ["use-auth.ts"]
+  },
+  "footer-button.tsx": {
+    imports: []
+  },
+  "hooks/use-auth.ts": {
+    imports: []
+  }
 }
+*/
