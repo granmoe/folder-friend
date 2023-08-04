@@ -14,7 +14,9 @@ export const fetchChatCompletion = async (
   console.log({ messagesTokenCount, remainingTokens })
 
   if (remainingTokens <= 0) {
-    throw new Error('Not enough tokens remaining for GPT-4 response')
+    throw new Error(
+      'Not enough tokens to call GPT-4 - try running on child folders of the current folder instead',
+    )
   }
 
   try {

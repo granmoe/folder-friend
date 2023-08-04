@@ -1,21 +1,19 @@
 import { Project } from 'ts-morph'
 import { ChatMessage } from './types'
+import { fetchChatCompletion } from './open-ai'
 
-type ProjectOrTsConfigPath =
-  | {
-      tsConfigFilePath: string
-      project?: never
-    }
-  | {
-      tsConfigFilePath?: never
-      project: Project
-    }
-
-export const localizeInternalDependencies = (
+export const localizeInternalDependencies = async (
   projectInfo: ProjectOrTsConfigPath = { tsConfigFilePath: 'tsconfig.json' },
 ) => {
   const project =
     projectInfo.project ?? getProject(projectInfo.tsConfigFilePath)
+
+  const dependencyGraph = buildDependencyGraph({ project })
+
+  const prompt = buildPrompt(dependencyGraph)
+  const fileOperations = await fetchChatCompletion(prompt)
+
+  console.log(fileOperations)
 
   /*
     1. Build dep graph
@@ -48,28 +46,6 @@ export const buildDependencyGraph = (
   return dependencyGraph
 }
 
-export const printProject = (
-  projectInfo: ProjectOrTsConfigPath = { tsConfigFilePath: 'tsconfig.json' },
-) => {
-  const project =
-    projectInfo.project ?? getProject(projectInfo.tsConfigFilePath)
-  const rootDir = project.getRootDirectories()[0] // Assuming we will only handle single root projects for now
-
-  const files = project.getSourceFiles()
-
-  let output = ''
-  for (const file of files) {
-    output +=
-      '// ' +
-      file.getFilePath().replace(rootDir.getPath() + '/', '') +
-      '\n' +
-      file.getText() +
-      '\n\n'
-  }
-
-  return output
-}
-
 let project: Project
 const getProject = (tsConfigFilePath: string) => {
   if (project) return project
@@ -92,6 +68,8 @@ const buildPrompt = (dependencyGraph: { [fileId: string]: string[] }) => {
       content: JSON.stringify(dependencyGraph),
     },
   ]
+
+  return messages
 }
 
 const SYSTEM_MESSAGE_CONTENT = `You will be given information on the files in a codebase, including the paths of all files, and, for each file, a list of files that import it (its dependents).
@@ -150,4 +128,28 @@ You should return these operations, one per line:
 { "type": "move", "source": "/my-app/src/common/helper.ts", "destination": "/my-app/src/helper.ts" }
 { "type": "delete-folder", "path": "/my-app/src/common" }
 
+And if a file is separated from its dependent via unnecessary nesting, like this:
+
+{
+  "/src/index.ts": [],
+  "/src/a/b/c/helper.ts": [
+    "/src/index.ts"
+  ]
+}
+
+You should move it next to its dependent by returning this:
+
+{ "type": "move", "source": "/src/a/b/c/helper.ts", "destination": "/src/helper.ts" }
+{ "type": "delete-folder", "path": "/src/a/b/c" }
+
 Next, the user will give you information about their files, and you will return the list of operations per above. Remember not to delete a folder that will be empty until you've moved all files out of that folder.`
+
+type ProjectOrTsConfigPath =
+  | {
+      tsConfigFilePath: string
+      project?: never
+    }
+  | {
+      tsConfigFilePath?: never
+      project: Project
+    }

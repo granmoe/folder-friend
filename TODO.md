@@ -5,7 +5,7 @@
 - Build dep graph
   - Test
 - Call OpenAI
-  - Use forced function calling + Zod
+  - Use forced function calling + Zod? Already getting good output, so maybe just Zod + retry with explanation of error for GPT-4 if needed
   - Mock in tests
 - Ignore instructions that operate on files outside of TS project
   - Test

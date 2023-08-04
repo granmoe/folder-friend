@@ -20,5 +20,5 @@
     "noFallthroughCasesInSwitch": true
   },
   "include": ["lib"],
-  "exclude": ["lib/**/*.test.ts", "lib/test-fixtures/**/*"]
+  "exclude": ["lib/**/*.test.ts", "lib/__test-fixtures/**/*"]
 }

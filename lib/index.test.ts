@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest'
 import path from 'path'
-import { buildDependencyGraph } from './'
+import { buildDependencyGraph, localizeInternalDependencies } from './'
 
 const basicProjectTsConfigFilePath = path.resolve(
   __dirname,
@@ -17,10 +17,17 @@ test('buildDependencyGraph()', () => {
     tsConfigFilePath: basicProjectTsConfigFilePath,
   })
 
-  console.log(dependencyGraph)
+  expect(dependencyGraph).toMatchInlineSnapshot(`
+    {
+      "/Users/mattgranmoe/code/folder-friend/lib/__test-fixtures/basic-project/src/common/helper.ts": [
+        "/Users/mattgranmoe/code/folder-friend/lib/__test-fixtures/basic-project/src/index.ts",
+      ],
+      "/Users/mattgranmoe/code/folder-friend/lib/__test-fixtures/basic-project/src/index.ts": [],
+    }
+  `)
 
-  // expect(dependencyGraph.size).toBe(4)
-  // expect(dependentsCount.size).toBe(4)
+  // { "type": "move", "source": "/Users/mattgranmoe/code/folder-friend/lib/__test-fixtures/basic-project/src/common/helper.ts", "destination": "/Users/mattgranmoe/code/folder-friend/lib/__test-fixtures/basic-project/src/helper.ts" }
+  // { "type": "delete-folder", "path": "/Users/mattgranmoe/code/folder-friend/lib/__test-fixtures/basic-project/src/common" }
 })
 
 /*
