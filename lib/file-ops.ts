@@ -53,7 +53,7 @@ export const deleteFolderIfEmpty = (folderPath: string): Promise<void> => {
       }
 
       if (files.length > 0) {
-        reject(new Error('The folder is not empty!'))
+        reject(new Error(`Cannot delete because ${folderPath} is not empty!`))
         return
       }
 

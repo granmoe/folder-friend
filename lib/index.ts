@@ -99,28 +99,36 @@ export const updateFolderStructure = async (
     let fileContent = fs.readFileSync(updateImportsOperation.originalFilepath, {
       encoding: 'utf-8',
     })
+    let fileChanged = false
     for (const importUpdate of updateImportsOperation.importUpdates) {
       if (importUpdate.original === importUpdate.updated) {
         console.log('Import update is a no-op. Skipping.')
         continue
       }
 
+      fileChanged = true
       fileContent = fileContent.replace(
         importUpdate.original,
         importUpdate.updated,
       )
+    }
+
+    if (fileChanged) {
+      fs.writeFileSync(updateImportsOperation.originalFilepath, fileContent, {
+        encoding: 'utf-8',
+      })
     }
   }
 
   // ✨ PERFORM FILE/FOLDER MOVES ✨
   for (const fileOperation of fileOperations) {
     if (fileOperation.type === 'move') {
-      moveFile(fileOperation.source, fileOperation.destination)
+      await moveFile(fileOperation.source, fileOperation.destination)
     } else if (fileOperation.type === 'create-folder') {
-      createFolder(fileOperation.path)
+      await createFolder(fileOperation.path)
     } else if (fileOperation.type === 'delete-folder') {
       try {
-        deleteFolderIfEmpty(fileOperation.path)
+        await deleteFolderIfEmpty(fileOperation.path)
       } catch (error) {
         console.error(error)
       }
@@ -246,11 +254,13 @@ const buildUpdateImportsSystemMessageContent = (
   importsByFilepath: string,
 ) => `Now, using the TS config and file snippets of the files below, please update the imports of each file per the instructions you returned. (The files are referred to by their original paths, but they have been moved.)
 
-Return one JSON object per line for each file that adheres to this structure ("originalFilepath" is the filepath before the instructions above have been carried out):
-{
-  "originalFilepath": "/example/file.tsx",
-  "importUpdates": [{ "original": "import { foo } from './helpers/foo'", "updated": "import { foo } from './foo'" }, { "original": "import { bar } from '../../bar'", "updated": "import { bar } from './bar'" }]
-}
+Return one JSON object per line (one for each file) that adheres to this structure ("originalFilepath" is the filepath before the instructions above have been carried out):
+
+{ "originalFilepath": "/example/file.tsx", "importUpdates": [{ "original": "import { foo } from './helpers/foo'", "updated": "import { foo } from './foo'" }, { "original": "import { bar } from '../../bar'", "updated": "import { bar } from './bar'" }] }
+
+Example response:
+{ "originalFilepath": "/example/index.tsx", "importUpdates": [{ "original": "import { a } from './a/a'", "updated": "import { a } from './a'" }, { "original": "import { b } from 'foo/b'", "updated": "import { b } from 'common/b'" ] }
+{ "originalFilepath": "/example/a.tsx", "importUpdates": [{ "original": "import { b } from '/foo/b'", "updated": "import { b } from 'common/b'" }] }
 
 If an import does not need to be changed, then omit it. If a file does not require any import updates at all, then omit this file from your response.
 
