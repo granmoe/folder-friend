@@ -1,67 +1,219 @@
+import fs from 'fs'
+import path from 'path'
 import { Project } from 'ts-morph'
 import { ChatMessage } from './types'
 import { fetchChatCompletion } from './open-ai'
+import { moveFile, createFolder, deleteFolderIfEmpty } from './file-ops'
 
-export const localizeInternalDependencies = async (
-  projectInfo: ProjectOrTsConfigPath = { tsConfigFilePath: 'tsconfig.json' },
+export const updateFolderStructure = async (
+  tsConfigFilePath?: string,
+  directory?: string,
 ) => {
-  const project =
-    projectInfo.project ?? getProject(projectInfo.tsConfigFilePath)
+  const cwd = directory ?? process.cwd()
+  console.log({ cwd })
 
-  const dependencyGraph = buildDependencyGraph({ project })
+  const project = getProject(tsConfigFilePath)
 
-  const prompt = buildPrompt(dependencyGraph)
-  const fileOperations = await fetchChatCompletion(prompt)
+  const dependencyGraph = buildDependencyGraph(project, cwd)
+  const importsByFilePath = buildImportsByFilepath(project, cwd)
 
-  console.log(fileOperations)
+  const fileMovesPrompt = buildFileMovesPrompt(dependencyGraph)
+  const fileOperationsRaw = await fetchChatCompletion(fileMovesPrompt)
 
-  /*
-    1. Build dep graph
-    2. Get file moves from OpenAI
-    3. Move files
-    4. Update imports (need to add this to prompt)
-    5. Write project
+  const fileOperations: FileOperation[] = fileOperationsRaw
+    .split('\n')
+    .map((fileOp: string) => {
+      return JSON.parse(fileOp)
+    })
 
-    Also need to validate
-  */
-}
+  console.log('File operations from GPT-4: ', fileOperations)
 
-export const buildDependencyGraph = (
-  projectInfo: ProjectOrTsConfigPath = { tsConfigFilePath: 'tsconfig.json' },
-) => {
-  const project =
-    projectInfo.project ?? getProject(projectInfo.tsConfigFilePath)
+  const fileOpOutsideOfCwdError = new Error(
+    'Suggested file operation is outside of target directory.',
+  )
 
-  const dependencyGraph: { [fileId: string]: string[] } = {}
-
-  const files = project.getSourceFiles()
-  for (const file of files) {
-    const dependents = file.getReferencingSourceFiles()
-
-    dependencyGraph[file.getFilePath()] = dependents.map((dep) =>
-      dep.getFilePath(),
-    )
+  // ⛔️ Abort if a suggested file op is outside of cwd ⛔️
+  for (const fileOperation of fileOperations) {
+    switch (fileOperation.type) {
+      case 'move':
+        if (
+          !fileOperation.source.startsWith(cwd) ||
+          !fileOperation.destination.startsWith(cwd)
+        ) {
+          throw fileOpOutsideOfCwdError
+        }
+        break
+      case 'delete-folder':
+      case 'create-folder':
+        if (!fileOperation.path.startsWith(cwd)) {
+          throw fileOpOutsideOfCwdError
+        }
+        break
+    }
   }
 
-  return dependencyGraph
+  const tsConfig = project.getCompilerOptions()
+
+  const updateImportsPrompt = buildUpdateImportsPrompt(
+    JSON.stringify(tsConfig),
+    JSON.stringify(importsByFilePath, null, 2),
+  )
+
+  const updateImportsOperationsRaw: string = await fetchChatCompletion([
+    ...fileMovesPrompt,
+    ...updateImportsPrompt,
+  ])
+
+  const updateImportsOperations: UpdateImportsOperation[] =
+    updateImportsOperationsRaw.split('\n').map((updateImportsOp: string) => {
+      return JSON.parse(updateImportsOp)
+    })
+
+  console.log('Update imports ops: ', updateImportsOperations)
+
+  // ⛔️ Abort if a suggested file op is outside of target dir ⛔️
+  for (const updateImportsOperation of updateImportsOperations) {
+    if (!updateImportsOperation.originalFilepath.includes(cwd)) {
+      throw new Error(
+        'Suggested import declaration update operation is for a file outside of target directory.',
+      )
+    }
+  }
+
+  // Now that we've validated that all operations are within the target directory,
+  // we can update the files...
+
+  // ✨ UPDATE IMPORTS ✨
+  for (const updateImportsOperation of updateImportsOperations) {
+    if (updateImportsOperation.importUpdates.length === 0) {
+      console.log('Empty import updates array. Skipping.')
+      continue
+    }
+
+    if (!updateImportsOperation.originalFilepath.includes(cwd)) {
+      throw new Error(
+        'Suggested import declaration update operation is for a file outside of target directory.',
+      )
+    }
+
+    let fileContent = fs.readFileSync(updateImportsOperation.originalFilepath, {
+      encoding: 'utf-8',
+    })
+    for (const importUpdate of updateImportsOperation.importUpdates) {
+      if (importUpdate.original === importUpdate.updated) {
+        console.log('Import update is a no-op. Skipping.')
+        continue
+      }
+
+      fileContent = fileContent.replace(
+        importUpdate.original,
+        importUpdate.updated,
+      )
+    }
+  }
+
+  // ✨ PERFORM FILE/FOLDER MOVES ✨
+  for (const fileOperation of fileOperations) {
+    if (fileOperation.type === 'move') {
+      moveFile(fileOperation.source, fileOperation.destination)
+    } else if (fileOperation.type === 'create-folder') {
+      createFolder(fileOperation.path)
+    } else if (fileOperation.type === 'delete-folder') {
+      try {
+        deleteFolderIfEmpty(fileOperation.path)
+      } catch (error) {
+        console.error(error)
+      }
+    }
+  }
+
+  console.log('SUCCESS! 🎉')
 }
 
 let project: Project
-const getProject = (tsConfigFilePath: string) => {
-  if (project) return project
+const getProject = (tsConfigFilePath?: string) => {
+  if (tsConfigFilePath) {
+    if (fs.existsSync(tsConfigFilePath)) {
+      project = new Project({
+        tsConfigFilePath,
+      })
+
+      return project
+    } else {
+      throw new Error(
+        `tsconfig.json not found at ${tsConfigFilePath} - please make sure your path is correct per your working directory`,
+      )
+    }
+  }
+
+  const foundTsConfigFilePath = findTsConfigFilePath(process.cwd())
 
   project = new Project({
-    tsConfigFilePath,
+    tsConfigFilePath: foundTsConfigFilePath,
   })
 
   return project
 }
 
-const buildPrompt = (dependencyGraph: { [fileId: string]: string[] }) => {
+const findTsConfigFilePath = (dir: string): string => {
+  const tsConfigPath = path.join(dir, 'tsconfig.json')
+
+  if (fs.existsSync(tsConfigPath)) {
+    return tsConfigPath
+  }
+
+  // If we're at the root directory and haven't found a TS config
+  if (dir === path.parse(dir).root) {
+    throw new Error('tsconfig.json not found in any parent directory.')
+  }
+
+  // Move up one directory
+  const parentDir = path.dirname(dir)
+
+  return findTsConfigFilePath(parentDir)
+}
+
+export const buildDependencyGraph = (project: Project, cwd: string) => {
+  const dependencyGraph: { [filepath: string]: string[] } = {}
+
+  const files = project.getSourceFiles().filter((file) => {
+    return file.getFilePath().startsWith(cwd)
+  })
+
+  for (const file of files) {
+    const dependents = file.getReferencingSourceFiles()
+
+    dependencyGraph[file.getFilePath()] = dependents.map((dep) => {
+      return dep.getFilePath()
+    })
+  }
+
+  return dependencyGraph
+}
+
+export const buildImportsByFilepath = (project: Project, cwd: string) => {
+  const importsByFilepath: { [filepath: string]: string[] } = {}
+
+  const files = project.getSourceFiles().filter((file) => {
+    return file.getFilePath().startsWith(cwd)
+  })
+
+  for (const file of files) {
+    importsByFilepath[file.getFilePath()] = file
+      .getImportDeclarations()
+      .map((imp) => imp.getText())
+  }
+
+  return importsByFilepath
+}
+
+const buildFileMovesPrompt = (dependencyGraph: {
+  [fileId: string]: string[]
+}) => {
   const messages: ChatMessage[] = [
     {
       role: 'system',
-      content: SYSTEM_MESSAGE_CONTENT,
+      content: FILE_MOVES_SYSTEM_MESSAGE_CONTENT,
     },
     {
       role: 'user',
@@ -72,7 +224,46 @@ const buildPrompt = (dependencyGraph: { [fileId: string]: string[] }) => {
   return messages
 }
 
-const SYSTEM_MESSAGE_CONTENT = `You will be given information on the files in a codebase, including the paths of all files, and, for each file, a list of files that import it (its dependents).
+const buildUpdateImportsPrompt = (
+  tsConfig: string,
+  importsByFilepath: string,
+) => {
+  const messages: ChatMessage[] = [
+    {
+      role: 'system',
+      content: buildUpdateImportsSystemMessageContent(
+        tsConfig,
+        importsByFilepath,
+      ),
+    },
+  ]
+
+  return messages
+}
+
+const buildUpdateImportsSystemMessageContent = (
+  tsConfig: string,
+  importsByFilepath: string,
+) => `Now, using the TS config and file snippets of the files below, please update the imports of each file per the instructions you returned. (The files are referred to by their original paths, but they have been moved.)
+
+Return one JSON object per line for each file that adheres to this structure ("originalFilepath" is the filepath before the instructions above have been carried out):
+{
+  "originalFilepath": "/example/file.tsx",
+  "importUpdates": [{ "original": "import { foo } from './helpers/foo'", "updated": "import { foo } from './foo'" }, { "original": "import { bar } from '../../bar'", "updated": "import { bar } from './bar'" }]
+}
+
+If an import does not need to be changed, then omit it. If a file does not require any import updates at all, then omit this file from your response.
+
+TS config:
+\`\`\`
+${tsConfig}
+\`\`\`
+
+Original imports by original filepath:
+${importsByFilepath}
+`
+
+const FILE_MOVES_SYSTEM_MESSAGE_CONTENT = `You will be given information on the files in a codebase, including the paths of all files, and, for each file, a list of files that import it (its dependents).
 
 For example, the following input:
 
@@ -144,12 +335,22 @@ You should move it next to its dependent by returning this:
 
 Next, the user will give you information about their files, and you will return the list of operations per above. Remember not to delete a folder that will be empty until you've moved all files out of that folder.`
 
-type ProjectOrTsConfigPath =
+type FileOperation =
   | {
-      tsConfigFilePath: string
-      project?: never
+      type: 'move'
+      source: string
+      destination: string
     }
   | {
-      tsConfigFilePath?: never
-      project: Project
+      type: 'delete-folder'
+      path: string
     }
+  | {
+      type: 'create-folder'
+      path: string
+    }
+
+type UpdateImportsOperation = {
+  originalFilepath: string
+  importUpdates: { original: string; updated: string }[]
+}

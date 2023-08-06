@@ -4,6 +4,14 @@ import { ChatMessage } from '../types'
 
 export const fetchChatCompletion = async (
   messages: ChatMessage[],
+  options: {
+    onError?: (
+      completion: string,
+      retryWithFeedback: (message: ChatMessage) => Promise<string>,
+    ) => void
+    retries?: number
+  } = {},
+  retryCount = 0,
 ): Promise<any> => {
   const messagesTokenCount = getTokenCountForMessages(messages)
 
@@ -20,13 +28,14 @@ export const fetchChatCompletion = async (
   }
 
   try {
+    console.log('Calling GPT-4...')
     const { data } = await axios.post(
       OPENAI_CHAT_COMPLETIONS_URL,
       {
         model: 'gpt-4',
         messages,
         max_tokens: Math.max(remainingTokens, minResponseTokens),
-        temperature: 0.2,
+        temperature: 0.0,
         top_p: 1,
         frequency_penalty: 0,
         presence_penalty: 0,
@@ -50,6 +59,8 @@ export const fetchChatCompletion = async (
     console.log(error)
     return 'Error calling GPT-4'
   }
+
+  console.log('Called GPT-4')
 }
 
 const getTokenCountForMessages = (messages: ChatMessage[]) =>

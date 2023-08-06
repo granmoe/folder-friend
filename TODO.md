@@ -1,5 +1,55 @@
 # GPT version
 
+## Make an OpenAI utility package
+
+- What to do on error
+  - Retries on error with feedback
+- Retry on 429 via axios-retry
+- How to handle running out of tokens
+
+Example usage:
+
+```ts
+fetchChatCompletion<TCompletionType>(messages, {
+  temperature: 0.5,
+  minResponseTokens: 100,
+  truncateMessages: (messages, overage) => {
+    // truncate messages
+    return messages.slice(1)
+  },
+  validateResponse: (completion, retryWithFeedback): TCompletionType => {
+    // do some validation
+    // return completion, throw error, or call retryWithFeedback(message)
+    // Somehow, if we pass a Zod schema, the function should return this as the type (maybe use a generic)
+  },
+  retries: 2,
+})
+```
+
+## Old notes
+
+localizeInternalDependencies
+
+- Setup project
+-
+- For each file:
+- Find stray internal dependencies
+- Move files
+- Update imports
+-
+- Write project
+- To do: what if a file has an internal dep but is also the internal dep of another file? Need to build dep graph and do in order of topological sort
+
+- Skip if circular import
+- Handle common deps in another function that can be called separately or can do both at once in two passes
+- Need to track other imports of moved file and update them using relative helper thing
+
+FF: start with just finding files with one export and one dependent and put in a (potentially new, if not index) folder with their dependent. Then can check if index has one export only and one dependent and put as sibling if dep is index or nest dep and convert to index etc.
+
+This could potentially go a long ways.
+
+---
+
 ## Launch
 
 - Build dep graph
