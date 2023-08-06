@@ -28,7 +28,9 @@ const basicProject = new Project({
 //   }
 // })
 
-test.only(
+// This is an e2e test of the entire flow, so run with caution
+// Will add some more controlled e2e tests that seed an example project during setup, then clear it out at the end
+test.skip(
   'updateFolderStructure()',
   async () => {
     await updateFolderStructure(
@@ -47,10 +49,10 @@ test('buildDependencyGraph()', async () => {
 
   expect(dependencyGraph).toMatchInlineSnapshot(`
     {
-      "/Users/mattgranmoe/code/folder-friend/lib/__test-fixtures/basic-project/src/common/helper.ts": [
+      "/Users/mattgranmoe/code/folder-friend/lib/__test-fixtures/basic-project/src/index.ts": [],
+      "/Users/mattgranmoe/code/folder-friend/lib/__test-fixtures/basic-project/src/utilities/helper.ts": [
         "/Users/mattgranmoe/code/folder-friend/lib/__test-fixtures/basic-project/src/index.ts",
       ],
-      "/Users/mattgranmoe/code/folder-friend/lib/__test-fixtures/basic-project/src/index.ts": [],
     }
   `)
 })

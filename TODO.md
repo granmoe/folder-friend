@@ -1,5 +1,8 @@
 # GPT version
 
+- Some way to e2e test with an example project and reset at the end
+  - Seed project at the start each time, then delete everything in its dir at the end
+
 ## Make an OpenAI utility package
 
 - What to do on error

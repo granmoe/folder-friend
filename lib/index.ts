@@ -19,6 +19,7 @@ export const updateFolderStructure = async (
 
   const fileMovesPrompt = buildFileMovesPrompt(dependencyGraph)
   const fileOperationsRaw = await fetchChatCompletion(fileMovesPrompt)
+  console.log('file ops raw: ', fileOperationsRaw)
 
   const fileOperations: FileOperation[] = fileOperationsRaw
     .split('\n')

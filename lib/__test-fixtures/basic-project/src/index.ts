@@ -1,4 +1,4 @@
-import { helper } from './common/helper'
+import { helper } from './utilities/helper'
 
 export const foo = () => {
   return helper()
