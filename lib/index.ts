@@ -20,7 +20,7 @@ const parser = yargs(process.argv.slice(2))
     },
     dry_run: {
       describe:
-        'See what changes would be made, then choose to continue to exit',
+        'See what changes would be made, then choose to continue to exit. If not passed, changes will be made immediately.',
       type: 'boolean',
       demandOption: false,
       default: true,
@@ -43,7 +43,7 @@ const main = async () => {
 
   console.log(`Running on directory: ${targetDir} ...`)
 
-  executeMainCommand(openAiApiKey, targetDir, dryRun)
+  runCommand(openAiApiKey, targetDir, dryRun)
     .then(() => {
       console.log('Success!')
     })
@@ -54,13 +54,13 @@ const main = async () => {
 
 main()
 
-async function executeMainCommand(
+async function runCommand(
   openAiApiKey: string,
   targetDir: string,
-  dry_run: boolean,
+  dryRun: boolean,
 ) {
-  console.log({ openAiApiKey, targetDir, dry_run })
-  if (dry_run) {
+  console.log({ openAiApiKey, targetDir, dry_run: dryRun })
+  if (dryRun) {
     // First gather instructions and print them, then execute
     // TODO: Going to need to separate these two things in the code
 
@@ -72,9 +72,9 @@ async function executeMainCommand(
     })
 
     return new Promise<void>((resolve) => {
-      rl.question('Do you want to continue? (yes/no): ', (answer) => {
+      rl.question('Do you want to continue? (y/n): ', (answer) => {
         rl.close()
-        if (answer.toLowerCase() === 'yes') {
+        if (answer.toLowerCase() === 'y') {
           // If user wants to continue, execute some more logic
           console.log('Executing the main logic...')
           // Add your logic here
