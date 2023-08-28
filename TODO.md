@@ -1,3 +1,13 @@
+# Alpha launch
+
+- Wrap in a CLI via yargs
+  - options: openai_api_key, tsconfig_path, directory (defaults to cwd)
+- Convert vitest tests to jest
+- Add more tests where we cp entire projects to temp test dir
+- Move to Loom repo
+
+- Definitely need a dry run option! Show before/after file tree, then give option to execute
+
 # GPT version
 
 - Some way to e2e test with an example project and reset at the end

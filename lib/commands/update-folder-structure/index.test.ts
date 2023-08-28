@@ -1,7 +1,7 @@
 import path from 'path'
 import { expect, test, vi } from 'vitest'
 import { Project } from 'ts-morph'
-import { buildDependencyGraph, updateFolderStructure } from './'
+import { buildDependencyGraph, updateFolderStructure } from '.'
 
 const basicProject = new Project({
   tsConfigFilePath: path.resolve(

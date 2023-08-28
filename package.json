@@ -1,32 +1,29 @@
 {
   "name": "folder-friend",
   "version": "0.0.1",
-  "type": "module",
-  "files": [
-    "dist"
-  ],
-  "main": "./dist/index.umd.cjs",
-  "module": "./dist/index.js",
-  "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "require": "./dist/index.umd.cjs"
-    }
+  "bin": {
+    "folder-friend": "dist/index.js"
   },
+  "type": "module",
+  "main": "./dist/index.js",
+  "files": [
+    "dist/*"
+  ],
   "scripts": {
-    "build": "NODE_ENV=production tsc && vite build",
+    "build": "tsc",
     "dev": "NODE_ENV=test tsc && vite build && npm run test",
-    "preview": "vite preview",
-    "test": "vitest"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {
     "@types/node": "^20.4.5",
+    "@types/yargs": "^17.0.24",
+    "typescript": "^5.0.2"
+  },
+  "dependencies": {
     "axios": "^1.4.0",
     "axios-retry": "^3.6.0",
     "gpt-3-encoder": "^1.1.4",
     "ts-morph": "^19.0.0",
-    "typescript": "^5.0.2",
-    "vite": "^4.4.5",
-    "vitest": "^0.33.0"
+    "yargs": "^17.7.2"
   }
 }

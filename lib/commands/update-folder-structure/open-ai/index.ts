@@ -1,17 +1,9 @@
 import { encode } from 'gpt-3-encoder'
 import axios from './axios-instance'
-import { ChatMessage } from '../types'
+import { ChatMessage } from '../../../types'
 
 export const fetchChatCompletion = async (
   messages: ChatMessage[],
-  options: {
-    onError?: (
-      completion: string,
-      retryWithFeedback: (message: ChatMessage) => Promise<string>,
-    ) => void
-    retries?: number
-  } = {},
-  retryCount = 0,
 ): Promise<any> => {
   const messagesTokenCount = getTokenCountForMessages(messages)
 
@@ -59,8 +51,6 @@ export const fetchChatCompletion = async (
     console.log(error)
     return 'Error calling GPT-4'
   }
-
-  console.log('Called GPT-4')
 }
 
 const getTokenCountForMessages = (messages: ChatMessage[]) =>
