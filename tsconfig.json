@@ -15,5 +15,8 @@
     "noFallthroughCasesInSwitch": true
   },
   "include": ["lib"],
-  "exclude": ["lib/**/*.test.ts", "lib/__test-fixtures/**/*"]
+  "exclude": [
+    "lib/**/*.test.ts",
+    "lib/commands/update-folder-structure/__test-fixtures/**/*"
+  ]
 }

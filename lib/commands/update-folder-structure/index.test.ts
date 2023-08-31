@@ -1,5 +1,4 @@
-import path from 'path'
-import { expect, test, vi } from 'vitest'
+import * as path from 'path'
 import { Project } from 'ts-morph'
 import { buildDependencyGraph, updateFolderStructure } from '.'
 
@@ -10,36 +9,30 @@ const basicProject = new Project({
   ),
 })
 
-// vi.mock('./open-ai', () => {
-//   return {
-//     fetchChatCompletion: async () => [
-//       {
-//         type: 'move',
-//         source:
-//           '/Users/mattgranmoe/code/folder-friend/lib/__test-fixtures/basic-project/src/common/helper.ts',
-//         destination:
-//           '/Users/mattgranmoe/code/folder-friend/lib/__test-fixtures/basic-project/src/helper.ts',
-//       },
-//       {
-//         type: 'delete-folder',
-//         path: '/Users/mattgranmoe/code/folder-friend/lib/__test-fixtures/basic-project/src/common',
-//       },
-//     ],
-//   }
-// })
+jest.mock('./open-ai', () => {
+  return {
+    fetchChatCompletion: async () => [
+      {
+        type: 'move',
+        source:
+          '/Users/mattgranmoe/code/folder-friend/lib/__test-fixtures/basic-project/src/common/helper.ts',
+        destination:
+          '/Users/mattgranmoe/code/folder-friend/lib/__test-fixtures/basic-project/src/helper.ts',
+      },
+      {
+        type: 'delete-folder',
+        path: '/Users/mattgranmoe/code/folder-friend/lib/__test-fixtures/basic-project/src/common',
+      },
+    ],
+  }
+})
 
-// This is an e2e test of the entire flow, so run with caution
-// Will add some more controlled e2e tests that seed an example project during setup, then clear it out at the end
-test.skip(
-  'updateFolderStructure()',
-  async () => {
-    await updateFolderStructure(
-      path.resolve(__dirname, './__test-fixtures/basic-project/tsconfig.json'),
-      path.resolve(__dirname, './__test-fixtures/basic-project/src'),
-    )
-  },
-  { timeout: 10000000 },
-)
+test.skip('updateFolderStructure()', async () => {
+  await updateFolderStructure(
+    path.resolve(__dirname, './__test-fixtures/basic-project/tsconfig.json'),
+    path.resolve(__dirname, './__test-fixtures/basic-project/src'),
+  )
+})
 
 test('buildDependencyGraph()', async () => {
   const dependencyGraph = buildDependencyGraph(
@@ -47,12 +40,20 @@ test('buildDependencyGraph()', async () => {
     path.resolve(__dirname, './__test-fixtures/basic-project/src'),
   )
 
-  expect(dependencyGraph).toMatchInlineSnapshot(`
-    {
-      "/Users/mattgranmoe/code/folder-friend/lib/__test-fixtures/basic-project/src/index.ts": [],
-      "/Users/mattgranmoe/code/folder-friend/lib/__test-fixtures/basic-project/src/utilities/helper.ts": [
-        "/Users/mattgranmoe/code/folder-friend/lib/__test-fixtures/basic-project/src/index.ts",
-      ],
-    }
-  `)
+  // Strip __dirname to make tests invariant to repo location on various machines
+  const updatedDependencyGraph: typeof dependencyGraph = {}
+  for (const [key, value] of Object.entries(dependencyGraph)) {
+    updatedDependencyGraph[key.replace(__dirname, '')] = value.map((v) =>
+      v.replace(__dirname, ''),
+    )
+  }
+
+  expect(updatedDependencyGraph).toMatchInlineSnapshot(`
+{
+  "/__test-fixtures/basic-project/src/index.ts": [],
+  "/__test-fixtures/basic-project/src/utilities/helper.ts": [
+    "/__test-fixtures/basic-project/src/index.ts",
+  ],
+}
+`)
 })
