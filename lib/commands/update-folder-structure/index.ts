@@ -10,7 +10,6 @@ export const updateFolderStructure = async (
   directory?: string,
 ) => {
   const cwd = directory ?? process.cwd()
-  console.log({ cwd })
 
   const project = getProject(tsConfigFilePath)
 
@@ -19,15 +18,12 @@ export const updateFolderStructure = async (
 
   const fileMovesPrompt = buildFileMovesPrompt(dependencyGraph)
   const fileOperationsRaw = await fetchChatCompletion(fileMovesPrompt)
-  console.log('file ops raw: ', fileOperationsRaw)
 
   const fileOperations: FileOperation[] = fileOperationsRaw
     .split('\n')
     .map((fileOp: string) => {
       return JSON.parse(fileOp)
     })
-
-  console.log('File operations from GPT-4: ', fileOperations)
 
   const fileOpOutsideOfCwdError = new Error(
     'Suggested file operation is outside of target directory.',
@@ -70,8 +66,6 @@ export const updateFolderStructure = async (
       return JSON.parse(updateImportsOp)
     })
 
-  console.log('Update imports ops: ', updateImportsOperations)
-
   // ⛔️ Abort if a suggested file op is outside of target dir ⛔️
   for (const updateImportsOperation of updateImportsOperations) {
     if (!updateImportsOperation.originalFilepath.includes(cwd)) {
@@ -87,7 +81,6 @@ export const updateFolderStructure = async (
   // ✨ UPDATE IMPORTS ✨
   for (const updateImportsOperation of updateImportsOperations) {
     if (updateImportsOperation.importUpdates.length === 0) {
-      console.log('Empty import updates array. Skipping.')
       continue
     }
 
@@ -103,7 +96,6 @@ export const updateFolderStructure = async (
     let fileChanged = false
     for (const importUpdate of updateImportsOperation.importUpdates) {
       if (importUpdate.original === importUpdate.updated) {
-        console.log('Import update is a no-op. Skipping.')
         continue
       }
 

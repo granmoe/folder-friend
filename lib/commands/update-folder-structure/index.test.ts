@@ -5,7 +5,7 @@ import { buildDependencyGraph, updateFolderStructure } from '.'
 const basicProject = new Project({
   tsConfigFilePath: path.resolve(
     __dirname,
-    './__test-fixtures/basic-project/tsconfig.json',
+    './__test-projects/basic-project/tsconfig.json',
   ),
 })
 
@@ -37,7 +37,7 @@ test.skip('updateFolderStructure()', async () => {
 test('buildDependencyGraph()', async () => {
   const dependencyGraph = buildDependencyGraph(
     basicProject,
-    path.resolve(__dirname, './__test-fixtures/basic-project/src'),
+    path.resolve(__dirname, './__test-projects/basic-project/src'),
   )
 
   // Strip __dirname to make tests invariant to repo location on various machines
@@ -50,9 +50,9 @@ test('buildDependencyGraph()', async () => {
 
   expect(updatedDependencyGraph).toMatchInlineSnapshot(`
 {
-  "/__test-fixtures/basic-project/src/index.ts": [],
-  "/__test-fixtures/basic-project/src/utilities/helper.ts": [
-    "/__test-fixtures/basic-project/src/index.ts",
+  "/__test-projects/basic-project/src/index.ts": [],
+  "/__test-projects/basic-project/src/utilities/helper.ts": [
+    "/__test-projects/basic-project/src/index.ts",
   ],
 }
 `)
