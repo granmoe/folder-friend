@@ -1,6 +1,6 @@
 # Next
 
-- Add README
+- Show tree of files before / after changes
 
 # Backlog
 
