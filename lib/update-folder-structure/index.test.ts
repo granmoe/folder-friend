@@ -9,31 +9,6 @@ const basicProject = new Project({
   ),
 })
 
-jest.mock('./open-ai', () => {
-  return {
-    fetchChatCompletion: async () => [
-      {
-        type: 'move',
-        source:
-          '/Users/mattgranmoe/code/folder-friend/lib/__test-fixtures/basic-project/src/common/helper.ts',
-        destination:
-          '/Users/mattgranmoe/code/folder-friend/lib/__test-fixtures/basic-project/src/helper.ts',
-      },
-      {
-        type: 'delete-folder',
-        path: '/Users/mattgranmoe/code/folder-friend/lib/__test-fixtures/basic-project/src/common',
-      },
-    ],
-  }
-})
-
-test.skip('updateFolderStructure()', async () => {
-  await updateFolderStructure(
-    path.resolve(__dirname, './__test-fixtures/basic-project/tsconfig.json'),
-    path.resolve(__dirname, './__test-fixtures/basic-project/src'),
-  )
-})
-
 test('buildDependencyGraph()', async () => {
   const dependencyGraph = buildDependencyGraph(
     basicProject,

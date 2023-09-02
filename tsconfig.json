@@ -17,6 +17,6 @@
   "include": ["lib"],
   "exclude": [
     "lib/**/*.test.ts",
-    "lib/commands/update-folder-structure/__test-projects/**/*"
+    "lib/update-folder-structure/__test-projects/**/*"
   ]
 }

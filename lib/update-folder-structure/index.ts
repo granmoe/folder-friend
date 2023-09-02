@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import { Project } from 'ts-morph'
-import { ChatMessage } from '../../types'
+import { ChatMessage } from '../types'
 import { fetchChatCompletion } from './open-ai'
 import { moveFile, createFolder, deleteFolderIfEmpty } from './file-ops'
 

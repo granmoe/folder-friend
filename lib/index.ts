@@ -35,7 +35,6 @@ const main = async () => {
   const dryRun = argv.dry_run
 
   if (!openAiApiKey) {
-    console.log('yo')
     throw new Error(
       'OpenAI API Key is required. Pass it in as an argument or set OPENAI_API_KEY env var.',
     )

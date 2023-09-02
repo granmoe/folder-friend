@@ -1,6 +1,6 @@
 import { encode } from 'gpt-3-encoder'
 import axios from './axios-instance'
-import { ChatMessage } from '../../../types'
+import { ChatMessage } from '../../types'
 
 export const fetchChatCompletion = async (
   messages: ChatMessage[],
