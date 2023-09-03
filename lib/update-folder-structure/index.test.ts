@@ -1,18 +1,18 @@
-import * as path from 'path'
+import path from 'path'
 import { Project } from 'ts-morph'
-import { buildDependencyGraph, updateFolderStructure } from '.'
+import { buildDependencyGraph } from '.'
 
 const basicProject = new Project({
-  tsConfigFilePath: path.resolve(
+  tsConfigFilePath: path.join(
     __dirname,
-    './__test-projects/basic-project/tsconfig.json',
+    '/__test-projects/basic-project/tsconfig.json',
   ),
 })
 
-test('buildDependencyGraph()', async () => {
+test('creates dep graph of a tiny project', async () => {
   const dependencyGraph = buildDependencyGraph(
     basicProject,
-    path.resolve(__dirname, './__test-projects/basic-project/src'),
+    path.join(__dirname, '/__test-projects/basic-project/src'),
   )
 
   // Strip __dirname to make tests invariant to repo location on various machines

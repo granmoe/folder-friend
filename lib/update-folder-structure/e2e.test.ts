@@ -1,26 +1,26 @@
-import * as fs from 'fs'
-import * as path from 'path'
-// import { updateFolderStructure } from '.'
+import fs from 'fs'
+import path from 'path'
+import { updateFolderStructure } from '.'
+
+const testProjectsPath = path.join(__dirname, '/__test-projects')
+const tempTestProjectsPath = path.join(__dirname, '/__test-projects-tmp')
 
 beforeAll(() => {
-  fs.cpSync(
-    path.join(__dirname, '/__test-projects'),
-    path.join(__dirname, '/__test-projects-tmp'),
-    { recursive: true },
-  )
+  fs.cpSync(testProjectsPath, tempTestProjectsPath, { recursive: true })
 })
 
 afterAll(() => {
-  fs.rmSync(path.join(__dirname, '/__test-projects-tmp'), { recursive: true })
+  fs.rmSync(tempTestProjectsPath, { recursive: true })
 })
 
-test('updateFolderStructure()', async () => {
-  console.log('hi')
-  await new Promise((resolve) => setTimeout(resolve, 20000))
-  expect(true).toBe(true)
+test('Tiny, basic project', async () => {
+  // TODO: Also put these into consts in module scope because it would be really bad to operate on the wrong dir!
+  await updateFolderStructure(
+    path.join(tempTestProjectsPath, '/basic-project/tsconfig.json'),
+    path.join(tempTestProjectsPath, '/basic-project/src'),
+  )
 
-  // await updateFolderStructure(
-  //   path.resolve(__dirname, './tmp/basic-project/tsconfig.json'),
-  //   path.resolve(__dirname, './tmp/basic-project/src'),
-  // )
+  // Get file tree for folder and assert on it
+
+  expect(true).toBe(true)
 }, 60000)

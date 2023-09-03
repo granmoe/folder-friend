@@ -1,10 +1,17 @@
 # Next
 
-- Show tree of files before / after changes
+- Show tree of files before making changes
+- Prompt to continue after showing tree
+- Show tree of files after making changes
 
 # Backlog
 
 - Move to Loom repo
+- ESLint
+- Husky hooks
+- Get around context window limitations
+  - Maybe mark dirs as good so we can only look at their index file and move entire dir together as we go up the tree
+  - Maybe a fine-tuned GPT-3.5, 16k coming "this fall" which is 4x more tokens
 - Dry run: show before/after file tree, then give option to execute
   - Not really "dry run" but can't think of a better name
 - Add Zod + retry with guidance for GPT-4 based on errors if needed
