@@ -2,6 +2,7 @@
 
 - Dry run
   - Perform file changes in temp dir or otherwise simulate changes so we can show before/after
+  - Will have to refactor so we can return the operations from one function, simulate changes, then perform changes separately if the user chooses to continue
   - Show before and after formatted file tree and prompt to continue or abort
 
 # Backlog
