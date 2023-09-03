@@ -8,6 +8,7 @@
 # Backlog
 
 - Move to Loom repo
+- Prob break up update-folder-structure/index.ts if it's going to need to export multiple things
 - ESLint
 - Husky hooks
 - Get around context window limitations
