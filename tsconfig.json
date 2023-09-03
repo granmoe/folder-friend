@@ -15,9 +15,6 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["lib"],
-  "exclude": [
-    "lib/**/*.test.ts",
-    "lib/update-folder-structure/__test-projects/**/*"
-  ]
+  "include": ["lib", "__test-projects"],
+  "exclude": ["lib/**/*.test.ts", "__test-projects/**/*"]
 }

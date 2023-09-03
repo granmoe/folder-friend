@@ -9,7 +9,6 @@
 
 - Move to Loom repo
 - Prob break up update-folder-structure/index.ts if it's going to need to export multiple things
-- Clean up test files location
 - Husky hooks
 - Get around context window limitations
   - Maybe mark dirs as good so we can only look at their index file and move entire dir together as we go up the tree
