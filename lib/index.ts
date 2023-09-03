@@ -18,12 +18,12 @@ const parser = yargs(process.argv.slice(2))
       type: 'string',
       demandOption: false,
     },
-    dry_run: {
+    yolo: {
       describe:
-        'See what changes would be made, then choose to continue to exit. If not passed, changes will be made immediately.',
+        'If false, you will be shown the file tree before and after changes, then prompted to actually perform the changes or exit. If true, changes will be made immediately.',
       type: 'boolean',
       demandOption: false,
-      default: true,
+      default: false,
     },
   })
 
@@ -32,7 +32,7 @@ const main = async () => {
 
   const openAiApiKey = argv.openai_api_key ?? process.env.OPENAI_API_KEY
   const targetDir = argv.target_dir ?? process.cwd()
-  const dryRun = argv.dry_run
+  const yolo = argv.yolo
 
   if (!openAiApiKey) {
     throw new Error(
@@ -42,7 +42,7 @@ const main = async () => {
 
   console.log(`Running on directory: ${targetDir} ...`)
 
-  runCommand(openAiApiKey, targetDir, dryRun)
+  runCommand(openAiApiKey, targetDir, yolo)
     .then(() => {
       console.log('Success!')
     })
@@ -56,15 +56,13 @@ main()
 async function runCommand(
   openAiApiKey: string,
   targetDir: string,
-  dryRun: boolean,
+  yolo: boolean,
 ) {
-  console.log({ openAiApiKey, targetDir, dry_run: dryRun })
-  if (dryRun) {
-    // First gather instructions and print them, then execute
-    // TODO: Going to need to separate these two things in the code
+  console.log(`Running with the following options: ${{ targetDir, yolo }}`)
 
-    console.log('Executing in dry run mode...')
-
+  if (yolo) {
+    // TODO: Just do changes
+  } else {
     const rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout,
@@ -84,7 +82,5 @@ async function runCommand(
         }
       })
     })
-  } else {
-    // YOLO
   }
 }

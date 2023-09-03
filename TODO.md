@@ -1,6 +1,6 @@
 # Next
 
-- Dry run
+- --yolo=false
   - Perform file changes in temp dir or otherwise simulate changes so we can show before/after
   - Will have to refactor so we can return the operations from one function, simulate changes, then perform changes separately if the user chooses to continue
   - Show before and after formatted file tree and prompt to continue or abort
@@ -13,8 +13,6 @@
 - Get around context window limitations
   - Maybe mark dirs as good so we can only look at their index file and move entire dir together as we go up the tree
   - Maybe a fine-tuned GPT-3.5, 16k coming "this fall" which is 4x more tokens
-- Dry run: show before/after file tree, then give option to execute
-  - Not really "dry run" but can't think of a better name
 - Add Zod + retry with guidance for GPT-4 based on errors if needed
 - Skip circular imports and print warning
 
