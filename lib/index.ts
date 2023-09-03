@@ -2,6 +2,8 @@
 import yargs from 'yargs/yargs'
 import readline from 'readline'
 
+import { updateFolderStructure } from './update-folder-structure'
+
 const parser = yargs(process.argv.slice(2))
   .usage('$0 <cmd> [args]')
   .help('help')
@@ -30,11 +32,11 @@ const parser = yargs(process.argv.slice(2))
 const main = async () => {
   const argv = await parser.argv
 
-  const openAiApiKey = argv.openai_api_key ?? process.env.OPENAI_API_KEY
+  const openAIApiKey = argv.openai_api_key ?? process.env.OPENAI_API_KEY
   const targetDir = argv.target_dir ?? process.cwd()
   const yolo = argv.yolo
 
-  if (!openAiApiKey) {
+  if (!openAIApiKey) {
     throw new Error(
       'OpenAI API Key is required. Pass it in as an argument or set OPENAI_API_KEY env var.',
     )
@@ -42,7 +44,7 @@ const main = async () => {
 
   console.log(`Running on directory: ${targetDir} ...`)
 
-  runCommand(openAiApiKey, targetDir, yolo)
+  runCommand(openAIApiKey, targetDir, yolo)
     .then(() => {
       console.log('Success!')
     })
@@ -54,15 +56,19 @@ const main = async () => {
 main()
 
 async function runCommand(
-  openAiApiKey: string,
+  openAIApiKey: string,
   targetDir: string,
   yolo: boolean,
 ) {
   console.log(`Running with the following options: ${{ targetDir, yolo }}`)
 
   if (yolo) {
-    // TODO: Just do changes
+    await updateFolderStructure({
+      openAIApiKey,
+      directory: targetDir,
+    })
   } else {
+    // TODO: Finish implementing non-YOLO mode
     const rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout,

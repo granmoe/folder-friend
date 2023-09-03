@@ -6,10 +6,15 @@ import { fetchChatCompletion } from './open-ai'
 import { moveFile, createFolder, deleteFolderIfEmpty } from './file-ops'
 import { buildFormattedFileTree } from './build-formatted-file-tree'
 
-export const updateFolderStructure = async (
-  tsConfigFilePath?: string,
-  directory?: string,
-) => {
+export const updateFolderStructure = async ({
+  openAIApiKey,
+  tsConfigFilePath,
+  directory,
+}: {
+  openAIApiKey: string
+  tsConfigFilePath?: string
+  directory?: string
+}) => {
   const dirToUpdate = directory ?? process.cwd()
 
   const project = getProject(tsConfigFilePath)
@@ -18,7 +23,10 @@ export const updateFolderStructure = async (
   const importsByFilePath = buildImportsByFilepath(project, dirToUpdate)
 
   const fileMovesPrompt = buildFileMovesPrompt(dependencyGraph)
-  const fileOperationsRaw = await fetchChatCompletion(fileMovesPrompt)
+  const fileOperationsRaw = await fetchChatCompletion(
+    fileMovesPrompt,
+    openAIApiKey,
+  )
 
   const fileOperations: FileOperation[] = fileOperationsRaw
     .split('\n')
@@ -57,10 +65,10 @@ export const updateFolderStructure = async (
     JSON.stringify(importsByFilePath, null, 2),
   )
 
-  const updateImportsOperationsRaw: string = await fetchChatCompletion([
-    ...fileMovesPrompt,
-    ...updateImportsPrompt,
-  ])
+  const updateImportsOperationsRaw: string = await fetchChatCompletion(
+    [...fileMovesPrompt, ...updateImportsPrompt],
+    openAIApiKey,
+  )
 
   const updateImportsOperations: UpdateImportsOperation[] =
     updateImportsOperationsRaw.split('\n').map((updateImportsOp: string) => {

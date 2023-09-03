@@ -3,7 +3,7 @@ import { buildFormattedFileTree } from '.'
 
 test('printFileTree', async () => {
   const prettyFileTree = await buildFormattedFileTree(
-    path.resolve(__dirname, '../__test-projects/basic-project/src'),
+    path.resolve(__dirname, '../../../__test-projects/basic-project/src'),
   )
 
   const lines = prettyFileTree.split('\n')

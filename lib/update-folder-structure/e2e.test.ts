@@ -2,8 +2,11 @@ import fs from 'fs'
 import path from 'path'
 import { updateFolderStructure } from '.'
 
-const testProjectsPath = path.join(__dirname, '/__test-projects')
-const tempTestProjectsPath = path.join(__dirname, '/__test-projects-tmp')
+const testProjectsPath = path.resolve(__dirname, '../../__test-projects')
+const tempTestProjectsPath = path.resolve(
+  __dirname,
+  '../../__test-projects-tmp',
+)
 
 beforeAll(() => {
   fs.cpSync(testProjectsPath, tempTestProjectsPath, { recursive: true })
@@ -15,14 +18,16 @@ afterAll(() => {
 
 test('Tiny, basic project', async () => {
   // TODO: Also put these into consts in module scope because it would be really bad to operate on the wrong dir!
-  await updateFolderStructure(
-    path.join(tempTestProjectsPath, '/basic-project/tsconfig.json'),
-    path.join(tempTestProjectsPath, '/basic-project/src'),
-  )
+  await updateFolderStructure({
+    tsConfigFilePath: path.join(
+      tempTestProjectsPath,
+      '/basic-project/tsconfig.json',
+    ),
+    directory: path.join(tempTestProjectsPath, '/basic-project/src'),
+    openAIApiKey: process.env.OPENAI_API_KEY ?? '',
+  })
 
-  await new Promise((resolve) => setTimeout(resolve, 10000))
-
-  // Get file tree for folder and assert on it
+  // TODO: Get file tree for folder and assert on it
 
   expect(true).toBe(true)
 }, 60000)

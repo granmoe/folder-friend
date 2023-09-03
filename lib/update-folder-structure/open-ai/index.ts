@@ -4,14 +4,13 @@ import { ChatMessage } from '../../types'
 
 export const fetchChatCompletion = async (
   messages: ChatMessage[],
+  openAIApiKey: string,
 ): Promise<any> => {
   const messagesTokenCount = getTokenCountForMessages(messages)
 
   const minResponseTokens = 2000
   const remainingTokens =
     MAX_GPT_4_TOKENS - messagesTokenCount - minResponseTokens
-
-  console.log({ messagesTokenCount, remainingTokens })
 
   if (remainingTokens <= 0) {
     throw new Error(
@@ -34,7 +33,7 @@ export const fetchChatCompletion = async (
       },
       {
         headers: {
-          Authorization: `Bearer ${process.env.OPEN_AI_API_KEY}`,
+          Authorization: `Bearer ${openAIApiKey}`,
         },
       },
     )
