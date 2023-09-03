@@ -20,6 +20,8 @@ test('Tiny, basic project', async () => {
     path.join(tempTestProjectsPath, '/basic-project/src'),
   )
 
+  await new Promise((resolve) => setTimeout(resolve, 10000))
+
   // Get file tree for folder and assert on it
 
   expect(true).toBe(true)

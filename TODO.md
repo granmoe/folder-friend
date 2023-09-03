@@ -1,8 +1,8 @@
 # Next
 
-- Show tree of files before making changes
-- Prompt to continue after showing tree
-- Show tree of files after making changes
+- Dry run
+  - Perform file changes in temp dir or otherwise simulate changes so we can show before/after
+  - Show before and after formatted file tree and prompt to continue or abort
 
 # Backlog
 

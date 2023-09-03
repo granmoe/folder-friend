@@ -4,17 +4,18 @@ import { Project } from 'ts-morph'
 import { ChatMessage } from '../types'
 import { fetchChatCompletion } from './open-ai'
 import { moveFile, createFolder, deleteFolderIfEmpty } from './file-ops'
+import { buildFormattedFileTree } from './build-formatted-file-tree'
 
 export const updateFolderStructure = async (
   tsConfigFilePath?: string,
   directory?: string,
 ) => {
-  const cwd = directory ?? process.cwd()
+  const dirToUpdate = directory ?? process.cwd()
 
   const project = getProject(tsConfigFilePath)
 
-  const dependencyGraph = buildDependencyGraph(project, cwd)
-  const importsByFilePath = buildImportsByFilepath(project, cwd)
+  const dependencyGraph = buildDependencyGraph(project, dirToUpdate)
+  const importsByFilePath = buildImportsByFilepath(project, dirToUpdate)
 
   const fileMovesPrompt = buildFileMovesPrompt(dependencyGraph)
   const fileOperationsRaw = await fetchChatCompletion(fileMovesPrompt)
@@ -34,15 +35,15 @@ export const updateFolderStructure = async (
     switch (fileOperation.type) {
       case 'move':
         if (
-          !fileOperation.source.startsWith(cwd) ||
-          !fileOperation.destination.startsWith(cwd)
+          !fileOperation.source.startsWith(dirToUpdate) ||
+          !fileOperation.destination.startsWith(dirToUpdate)
         ) {
           throw fileOpOutsideOfCwdError
         }
         break
       case 'delete-folder':
       case 'create-folder':
-        if (!fileOperation.path.startsWith(cwd)) {
+        if (!fileOperation.path.startsWith(dirToUpdate)) {
           throw fileOpOutsideOfCwdError
         }
         break
@@ -68,12 +69,14 @@ export const updateFolderStructure = async (
 
   // ⛔️ Abort if a suggested file op is outside of target dir ⛔️
   for (const updateImportsOperation of updateImportsOperations) {
-    if (!updateImportsOperation.originalFilepath.includes(cwd)) {
+    if (!updateImportsOperation.originalFilepath.includes(dirToUpdate)) {
       throw new Error(
         'Suggested import declaration update operation is for a file outside of target directory.',
       )
     }
   }
+
+  const formattedFileTreeBefore = await buildFormattedFileTree(dirToUpdate)
 
   // Now that we've validated that all operations are within the target directory,
   // we can update the files...
@@ -84,7 +87,7 @@ export const updateFolderStructure = async (
       continue
     }
 
-    if (!updateImportsOperation.originalFilepath.includes(cwd)) {
+    if (!updateImportsOperation.originalFilepath.includes(dirToUpdate)) {
       throw new Error(
         'Suggested import declaration update operation is for a file outside of target directory.',
       )
@@ -128,7 +131,12 @@ export const updateFolderStructure = async (
     }
   }
 
-  console.log('SUCCESS! 🎉')
+  const formattedFileTreeAfter = await buildFormattedFileTree(dirToUpdate)
+
+  console.log('SUCCESS! 🎉\n\n')
+
+  console.log('Before: \n\n', formattedFileTreeBefore)
+  console.log('After: \n\n', formattedFileTreeAfter)
 }
 
 let project: Project
