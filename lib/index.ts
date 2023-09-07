@@ -37,9 +37,10 @@ const main = async () => {
   const yolo = argv.yolo
 
   if (!openAIApiKey) {
-    throw new Error(
+    console.error(
       'OpenAI API Key is required. Pass it in as an argument or set OPENAI_API_KEY env var.',
     )
+    process.exit(1)
   }
 
   console.log(`Running on directory: ${targetDir}`)
@@ -47,9 +48,11 @@ const main = async () => {
   runCommand(openAIApiKey, targetDir, yolo)
     .then(() => {
       console.log('Success!')
+      process.exit(0)
     })
     .catch((err) => {
       console.error('Failed with error: ', err)
+      process.exit(1)
     })
 }
 
