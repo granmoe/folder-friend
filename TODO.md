@@ -8,6 +8,7 @@
 # Backlog
 
 - Move to Loom repo
+- Battle test this thing and add test cases here as we go! These will be crucial if we refactor away some of the GPT-4 magic.
 - Prob break up update-folder-structure/index.ts if it's going to need to export multiple things
 - Husky hooks
 - Address context window limitations
