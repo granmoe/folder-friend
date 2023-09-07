@@ -42,7 +42,7 @@ const main = async () => {
     )
   }
 
-  console.log(`Running on directory: ${targetDir} ...`)
+  console.log(`Running on directory: ${targetDir}`)
 
   runCommand(openAIApiKey, targetDir, yolo)
     .then(() => {
@@ -60,8 +60,6 @@ async function runCommand(
   targetDir: string,
   yolo: boolean,
 ) {
-  console.log(`Running with the following options: ${{ targetDir, yolo }}`)
-
   if (yolo) {
     await updateFolderStructure({
       openAIApiKey,
