@@ -1,6 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import { updateFolderStructure } from '.'
+import { buildFormattedFileTree } from './build-formatted-file-tree'
 
 const testProjectsPath = path.resolve(__dirname, '../../__test-projects')
 const tempTestProjectsPath = path.resolve(
@@ -17,7 +18,6 @@ afterAll(() => {
 })
 
 test('Tiny, basic project', async () => {
-  // TODO: Also put these into consts in module scope because it would be really bad to operate on the wrong dir!
   await updateFolderStructure({
     tsConfigFilePath: path.join(
       tempTestProjectsPath,
@@ -27,7 +27,12 @@ test('Tiny, basic project', async () => {
     openAIApiKey: process.env.OPENAI_API_KEY ?? '',
   })
 
-  // TODO: Get file tree for folder and assert on it
+  const prettyFileTree = await buildFormattedFileTree(
+    path.join(tempTestProjectsPath, '/basic-project/src'),
+  )
 
-  expect(true).toBe(true)
+  const lines = prettyFileTree.split('\n')
+
+  // This feels a bit brittle - need to change to assert against better structured data, like dep graph or something
+  expect(lines).toEqual(['├── helper.ts', '└── index.ts'])
 }, 60000)
