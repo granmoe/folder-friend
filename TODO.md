@@ -13,9 +13,9 @@
 - Handle async.tsx pattern
 - Prob break up update-folder-structure/index.ts if it's going to need to export multiple things
 - Husky hooks
-- Address context window limitations
+- Address context window limitations. Current GPT-4 4k window only works for small amount of files
+  - Could try GPT-3.5-16k once available (and fine-tune to get up to GPT-4 performance) or GPT-4-32k if we can get access
   - Maybe mark dirs as good so we can only look at their index file and move entire dir together as we go up the tree
-  - Consider using a fine-tuned GPT-3.5. 16k context window coming "this fall," which is 4x more tokens.
 - Add Zod + retry with guidance for GPT-4 based on errors if needed
 - Skip circular imports and print warning
 

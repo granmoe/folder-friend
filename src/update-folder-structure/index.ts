@@ -62,7 +62,7 @@ export const updateFolderStructure = async ({
 
   const updateImportsPrompt = buildUpdateImportsPrompt(
     JSON.stringify(tsConfig),
-    JSON.stringify(importsByFilePath, null, 2),
+    JSON.stringify(importsByFilePath),
   )
 
   const updateImportsOperationsRaw: string = await fetchChatCompletion(

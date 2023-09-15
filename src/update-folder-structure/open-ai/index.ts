@@ -8,7 +8,7 @@ export const fetchChatCompletion = async (
 ): Promise<any> => {
   const messagesTokenCount = getTokenCountForMessages(messages)
 
-  const minResponseTokens = 2000
+  const minResponseTokens = 1000
   const remainingTokens =
     MAX_GPT_4_TOKENS - messagesTokenCount - minResponseTokens
 
@@ -19,7 +19,8 @@ export const fetchChatCompletion = async (
   }
 
   try {
-    console.log('Calling GPT-4...')
+    console.log('Calling GPT...')
+
     const { data } = await axios.post(
       OPENAI_CHAT_COMPLETIONS_URL,
       {
@@ -57,6 +58,6 @@ const getTokenCountForMessages = (messages: ChatMessage[]) =>
     messages.map((m) => `role: ${m.role}, content: ${m.content}`).join('\n'),
   ).length
 
-const MAX_GPT_4_TOKENS = 8192
+const MAX_GPT_4_TOKENS = 4000
 
 const OPENAI_CHAT_COMPLETIONS_URL = 'https://api.openai.com/v1/chat/completions'
