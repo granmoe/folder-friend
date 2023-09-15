@@ -33,6 +33,6 @@ test('Tiny, basic project', async () => {
 
   const lines = prettyFileTree.split('\n')
 
-  // This feels a bit brittle - need to change to assert against better structured data, like dep graph or something
+  // This feels a bit brittle - need to change to assert against better structured data, like dep graph
   expect(lines).toEqual(['├── helper.ts', '└── index.ts'])
 }, 60000)
