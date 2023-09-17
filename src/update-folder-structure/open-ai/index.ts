@@ -58,6 +58,6 @@ const getTokenCountForMessages = (messages: ChatMessage[]) =>
     messages.map((m) => `role: ${m.role}, content: ${m.content}`).join('\n'),
   ).length
 
-const MAX_GPT_4_TOKENS = 4000
+const MAX_GPT_4_TOKENS = 8192
 
 const OPENAI_CHAT_COMPLETIONS_URL = 'https://api.openai.com/v1/chat/completions'
