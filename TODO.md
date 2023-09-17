@@ -1,5 +1,6 @@
 # Next
 
+- Remove path to project in dep graph and import graph to save tokens, then add back to response received from OpenAI
 - Implement --yolo=false
   - Perform file changes in temp dir or otherwise simulate changes so we can show before/after
   - Will have to refactor so we can return the operations from one function, simulate changes, then perform changes separately if the user chooses to continue
