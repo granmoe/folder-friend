@@ -17,11 +17,25 @@ export const updateFolderStructure = async ({
 }) => {
   const dirToUpdate = directory ?? process.cwd()
 
-  const project = getProject(tsConfigFilePath)
+  const finalTsConfigFilePath =
+    tsConfigFilePath ?? findTsConfigFilePath(dirToUpdate)
 
-  const dependencyGraph = buildDependencyGraph(project, dirToUpdate)
-  const importsByFilePath = buildImportsByFilepath(project, dirToUpdate)
+  const project = getProject(finalTsConfigFilePath)
 
+  const projectPath = path.dirname(finalTsConfigFilePath)
+
+  const dependencyGraph = buildDependencyGraph(
+    project,
+    dirToUpdate,
+    projectPath,
+  )
+  const importsByFilePath = buildImportsByFilepath(
+    project,
+    dirToUpdate,
+    projectPath,
+  )
+
+  // Get file operations from GPT-4
   const fileMovesPrompt = buildFileMovesPrompt(dependencyGraph)
   const fileOperationsRaw = await fetchChatCompletion(
     fileMovesPrompt,
@@ -31,7 +45,33 @@ export const updateFolderStructure = async ({
   const fileOperations: FileOperation[] = fileOperationsRaw
     .split('\n')
     .map((fileOp: string) => {
-      return JSON.parse(fileOp)
+      const parsedFileOperation: FileOperation = JSON.parse(fileOp)
+
+      if (parsedFileOperation.type === 'move') {
+        parsedFileOperation.source = path.join(
+          projectPath,
+          parsedFileOperation.source,
+        )
+
+        parsedFileOperation.destination = path.join(
+          projectPath,
+          parsedFileOperation.destination,
+        )
+      }
+
+      if (parsedFileOperation.type === 'create-folder') {
+        parsedFileOperation.path = path.join(
+          projectPath,
+          parsedFileOperation.path,
+        )
+      }
+
+      if (parsedFileOperation.type === 'delete-folder') {
+        parsedFileOperation.path = path.join(
+          projectPath,
+          parsedFileOperation.path,
+        )
+      }
     })
 
   const fileOpOutsideOfCwdError = new Error(
@@ -72,7 +112,16 @@ export const updateFolderStructure = async ({
 
   const updateImportsOperations: UpdateImportsOperation[] =
     updateImportsOperationsRaw.split('\n').map((updateImportsOp: string) => {
-      return JSON.parse(updateImportsOp)
+      const updateImportsOperation: UpdateImportsOperation =
+        JSON.parse(updateImportsOp)
+
+      // Add back project path
+      updateImportsOperation.originalFilepath = path.join(
+        projectPath,
+        updateImportsOperation.originalFilepath,
+      )
+
+      return updateImportsOperation
     })
 
   // ⛔️ Abort if a suggested file op is outside of target dir ⛔️
@@ -147,29 +196,18 @@ export const updateFolderStructure = async ({
   console.log('After: \n\n', formattedFileTreeAfter)
 }
 
-let project: Project
-const getProject = (tsConfigFilePath?: string) => {
-  if (tsConfigFilePath) {
-    if (fs.existsSync(tsConfigFilePath)) {
-      project = new Project({
-        tsConfigFilePath,
-      })
+const getProject = (tsConfigFilePath: string) => {
+  if (fs.existsSync(tsConfigFilePath)) {
+    const project = new Project({
+      tsConfigFilePath,
+    })
 
-      return project
-    } else {
-      throw new Error(
-        `tsconfig.json not found at ${tsConfigFilePath} - please make sure your path is correct per your working directory`,
-      )
-    }
+    return project
+  } else {
+    throw new Error(
+      `tsconfig.json not found at ${tsConfigFilePath} - please make sure your path is correct per your working directory`,
+    )
   }
-
-  const foundTsConfigFilePath = findTsConfigFilePath(process.cwd())
-
-  project = new Project({
-    tsConfigFilePath: foundTsConfigFilePath,
-  })
-
-  return project
 }
 
 const findTsConfigFilePath = (dir: string): string => {
@@ -190,7 +228,11 @@ const findTsConfigFilePath = (dir: string): string => {
   return findTsConfigFilePath(parentDir)
 }
 
-export const buildDependencyGraph = (project: Project, cwd: string) => {
+export const buildDependencyGraph = (
+  project: Project,
+  cwd: string,
+  projectPath: string,
+) => {
   const dependencyGraph: { [filepath: string]: string[] } = {}
 
   const files = project.getSourceFiles().filter((file) => {
@@ -200,23 +242,32 @@ export const buildDependencyGraph = (project: Project, cwd: string) => {
   for (const file of files) {
     const dependents = file.getReferencingSourceFiles()
 
-    dependencyGraph[file.getFilePath()] = dependents.map((dep) => {
-      return dep.getFilePath()
-    })
+    // We omit the path to the project and then add it back when doing file ops
+    // so that we can save a bunch of tokens in the OpenAI API calls
+    dependencyGraph[file.getFilePath().replace(projectPath, '')] =
+      dependents.map((dep) => {
+        return dep.getFilePath().replace(projectPath, '')
+      })
   }
 
   return dependencyGraph
 }
 
-export const buildImportsByFilepath = (project: Project, cwd: string) => {
+export const buildImportsByFilepath = (
+  project: Project,
+  cwd: string,
+  projectPath: string,
+) => {
   const importsByFilepath: { [filepath: string]: string[] } = {}
 
   const files = project.getSourceFiles().filter((file) => {
     return file.getFilePath().startsWith(cwd)
   })
 
+  // We omit the path to the project and then add it back when doing file ops
+  // so that we can save a bunch of tokens in the OpenAI API calls
   for (const file of files) {
-    importsByFilepath[file.getFilePath()] = file
+    importsByFilepath[file.getFilePath().replace(projectPath, '')] = file
       .getImportDeclarations()
       .map((imp) => imp.getText())
   }

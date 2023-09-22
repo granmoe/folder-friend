@@ -32,6 +32,7 @@ export const moveFile = (
   })
 }
 
+// TODO: Change to create if not exists
 export const createFolder = (folderPath: string): Promise<void> => {
   return new Promise((resolve, reject) => {
     fs.mkdir(folderPath, { recursive: true }, (error) => {

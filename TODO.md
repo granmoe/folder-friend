@@ -9,6 +9,9 @@
 # Backlog
 
 - Move to Loom repo
+- Check if folder exists before creating and skip if so (model may not have enough info to know a folder exists or may make a mistake and try creating an existing one anyway)
+- What the fuck to do about tests! Prob need to add more to the prompt and examples to help model understand this (allow more flexibility for tests to do cousin imports etc)
+- Test that project path is correctly removed and then added back in to the response from OpenAI
 - Battle test this thing and add test cases here as we go! These will be crucial if we refactor away some of the GPT-4 magic.
 - Handle the case where no index file exists and we need to create one / rename a file to index
 - Handle async.tsx pattern
