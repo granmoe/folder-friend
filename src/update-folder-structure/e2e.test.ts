@@ -37,25 +37,21 @@ test('Tiny, basic project', async () => {
 }, 60000)
 
 // Not enough tokens to run this
-test.todo(
-  'Zod',
-  async () => {
-    const zodProjectPath = path.join(tempTestProjectsPath, '/zod')
+test.skip('Zod', async () => {
+  const zodProjectPath = path.join(tempTestProjectsPath, '/zod')
 
-    await updateFolderStructure({
-      tsConfigFilePath: path.join(zodProjectPath, '/tsconfig.json'),
-      directory: path.join(zodProjectPath, '/src'),
-      openAIApiKey: process.env.OPENAI_API_KEY ?? '',
-    })
+  await updateFolderStructure({
+    tsConfigFilePath: path.join(zodProjectPath, '/tsconfig.json'),
+    directory: path.join(zodProjectPath, '/src'),
+    openAIApiKey: process.env.OPENAI_API_KEY ?? '',
+  })
 
-    const prettyFileTree = await buildFormattedFileTree(
-      path.join(zodProjectPath, '/src'),
-    )
+  const prettyFileTree = await buildFormattedFileTree(
+    path.join(zodProjectPath, '/src'),
+  )
 
-    const lines = prettyFileTree.split('\n')
+  const lines = prettyFileTree.split('\n')
 
-    // This feels a bit brittle - need to change to assert against better structured data, like dep graph
-    expect(lines).toEqual(['├── helper.ts', '└── index.ts'])
-  },
-  90000,
-)
+  // This feels a bit brittle - need to change to assert against better structured data, like dep graph
+  expect(lines).toEqual(['├── helper.ts', '└── index.ts'])
+}, 90000)
