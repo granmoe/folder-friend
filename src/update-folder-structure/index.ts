@@ -72,6 +72,8 @@ export const updateFolderStructure = async ({
           parsedFileOperation.path,
         )
       }
+
+      return parsedFileOperation
     })
 
   const fileOpOutsideOfCwdError = new Error(

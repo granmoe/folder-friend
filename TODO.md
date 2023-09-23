@@ -1,17 +1,15 @@
 # Next
 
-- Remove path to project in dep graph and import graph to save tokens, then add back to response received from OpenAI
 - Implement --yolo=false
   - Perform file changes in temp dir or otherwise simulate changes so we can show before/after
   - Will have to refactor so we can return the operations from one function, simulate changes, then perform changes separately if the user chooses to continue
   - Show before and after formatted file tree and prompt to continue or abort
 
-# Backlog
+# To Do
 
-- Move to Loom repo
 - Check if folder exists before creating and skip if so (model may not have enough info to know a folder exists or may make a mistake and try creating an existing one anyway)
-- What the fuck to do about tests! Prob need to add more to the prompt and examples to help model understand this (allow more flexibility for tests to do cousin imports etc)
-- Test that project path is correctly removed and then added back in to the response from OpenAI
+- Move to Loom repo
+- What to do about test files being exception in the folder structure guidelines? Prob need to add more to the prompt and examples to help model understand this (allow more flexibility for tests to do cousin imports etc)
 - Battle test this thing and add test cases here as we go! These will be crucial if we refactor away some of the GPT-4 magic.
 - Handle the case where no index file exists and we need to create one / rename a file to index
 - Handle async.tsx pattern
@@ -26,6 +24,7 @@
 
 # Tests to Add
 
+- Test that project path is correctly removed and then added back in to the response from OpenAI
 - E2E test with OpenAI mocked
 - Tests for file ops
 - Tests for all code paths in updateFolderStructure
