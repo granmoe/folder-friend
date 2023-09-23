@@ -275,7 +275,6 @@ test('creates dep graph of a medium project', async () => {
     "/src/benchmarks/string.ts",
     "/src/benchmarks/union.ts",
     "/src/helpers/partialUtil.ts",
-    "/playground.ts",
   ],
   "/src/locales/en.ts": [
     "/src/errors.ts",

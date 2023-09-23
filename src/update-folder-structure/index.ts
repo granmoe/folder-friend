@@ -242,7 +242,9 @@ export const buildDependencyGraph = (
   })
 
   for (const file of files) {
-    const dependents = file.getReferencingSourceFiles()
+    const dependents = file.getReferencingSourceFiles().filter((file) => {
+      return file.getFilePath().startsWith(cwd)
+    })
 
     // We omit the path to the project and then add it back when doing file ops
     // so that we can save a bunch of tokens in the OpenAI API calls

@@ -22,7 +22,7 @@ test('Tiny, basic project', async () => {
 
   await updateFolderStructure({
     tsConfigFilePath: path.join(basicProjectPath, '/tsconfig.json'),
-    directory: path.join(tempTestProjectsPath, '/src'),
+    directory: path.join(basicProjectPath, '/src'),
     openAIApiKey: process.env.OPENAI_API_KEY ?? '',
   })
 
