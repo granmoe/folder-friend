@@ -1,14 +1,9 @@
-# Next
+# To Do
 
 - Implement --yolo=false
   - Perform file changes in temp dir or otherwise simulate changes so we can show before/after
   - Will have to refactor so we can return the operations from one function, simulate changes, then perform changes separately if the user chooses to continue
   - Show before and after formatted file tree and prompt to continue or abort
-
-# To Do
-
-- Clean up and move to Loom repo
-  - Get basic test case working
 - How to handle test files? Anchor to neighboring file or enclosing folder? Analyze imports?
 - Battle test this thing and add test cases here as we go! These will be crucial if we refactor away some of the GPT-4 magic.
 - Handle the case where no index file exists and we need to create one / rename a file to index
