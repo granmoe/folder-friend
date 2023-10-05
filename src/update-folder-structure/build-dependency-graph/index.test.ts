@@ -51,6 +51,7 @@ test('creates dep graph of a medium project', async () => {
     )
   }
 
+  // TODO: Move to constant and use toEqual
   expect(updatedDependencyGraph).toMatchInlineSnapshot(`
 {
   "/__test-projects/zod/src/ZodError.ts": [
