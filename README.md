@@ -2,6 +2,8 @@
 
 Folder Friend is a CLI tool that analyzes the import relationships and folder structure of a given directory and calculates the necessary file/folder moves and renames needed to align your folder structure with Loom's folder structure guidelines (todo: link). You can then optionally have the CLI carry out these file operations for you.
 
+## 👶 NOTE THAT FOLDER FRIEND IS CURRENTLY IN ITS INFANCY AND MAY SPIT-UP OR POOP ON YOU - USE AT YOUR OWN RISK!
+
 ## Installation
 
 For now (until we publish this to npm):
