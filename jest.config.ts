@@ -8,7 +8,7 @@ const jestConfig: JestConfigWithTsJest = {
     '<rootDir>/__test-projects/',
   ],
   // prettier-ignore
-  testRegex: process.env.E2E ? ['.*e2e\.test\.tsx?'] : ['.*(?<!e2e)\.test.tsx?'],
+  testRegex: ['.*\.test\.tsx?'],
 }
 
 export default jestConfig

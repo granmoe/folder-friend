@@ -10,8 +10,7 @@
   ],
   "scripts": {
     "build": "tsc",
-    "test:unit": "jest",
-    "test:e2e": "E2E=true jest"
+    "test": "jest"
   },
   "devDependencies": {
     "@types/jest": "^29.5.4",

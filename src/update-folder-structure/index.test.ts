@@ -33,7 +33,7 @@ test('Tiny, basic project', async () => {
 
   // This feels a bit brittle - need to change to assert against better structured data, like dep graph
   expect(lines).toEqual(['├── helper.ts', '└── index.ts'])
-}, 60000)
+})
 
 test.skip('Zod', async () => {
   const zodProjectPath = path.join(tempTestProjectsPath, '/zod')
@@ -51,7 +51,7 @@ test.skip('Zod', async () => {
 
   // This feels a bit brittle - need to change to assert against better structured data, like dep graph
   expect(lines).toEqual(['├── helper.ts', '└── index.ts'])
-}, 20000)
+})
 
 /*
   OTHER TEST CASES TO ADD (in the form of dep graphs)

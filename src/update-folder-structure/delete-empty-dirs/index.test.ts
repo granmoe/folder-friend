@@ -2,33 +2,38 @@ import fs from 'fs'
 import path from 'path'
 import { deleteEmptyDirectories } from '.'
 
-const tempTestProjectsPath = path.resolve(
-  __dirname,
-  '../../__delete-empty-dirs-tmp',
-)
+const tempTestProjectsPath = path.resolve(__dirname, 'tmp')
 
-beforeAll(() => {
+beforeEach(() => {
   fs.mkdirSync(tempTestProjectsPath)
 })
 
-afterAll(() => {
+afterEach(() => {
   fs.rmSync(tempTestProjectsPath, { recursive: true })
 })
 
-test('It should delete empty directories', () => {
+test('Deletes empty directories', () => {
   const testDirPath = path.join(tempTestProjectsPath, '/empty-dirs-test')
-
   fs.mkdirSync(testDirPath, { recursive: true })
-  const emptyDirPath = path.join(testDirPath, '/empty-dir')
+
+  const srcDirPath = path.join(testDirPath, '/src')
+  fs.mkdirSync(srcDirPath)
+
+  const filePath = path.join(srcDirPath, '/file.txt')
+  fs.writeFileSync(filePath, 'Hello World')
+
+  const emptyDirPath = path.join(srcDirPath, '/empty-dir')
   fs.mkdirSync(emptyDirPath)
 
   deleteEmptyDirectories(testDirPath)
 
+  expect(fs.existsSync(srcDirPath)).toBe(true)
+  expect(fs.existsSync(filePath)).toBe(true)
+
   expect(fs.existsSync(emptyDirPath)).toBe(false)
-  expect(fs.existsSync(testDirPath)).toBe(true)
 })
 
-test.todo('It should handle nested empty directories', () => {
+test.skip('It should handle nested empty directories', () => {
   // Create test directory structure
   const testDirectoryPath = path.join(
     tempTestProjectsPath,
@@ -51,7 +56,7 @@ test.todo('It should handle nested empty directories', () => {
   expect(fs.existsSync(testDirectoryPath)).toBe(true)
 })
 
-test.todo('It should not delete directories with files', () => {
+test.skip('It should not delete directories with files', () => {
   // Create test directory structure
   const testDirectoryPath = path.join(tempTestProjectsPath, '/non-empty-test')
   fs.mkdirSync(testDirectoryPath, { recursive: true })
