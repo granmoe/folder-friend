@@ -23,7 +23,6 @@ test('Tiny, basic project', async () => {
   await updateFolderStructure({
     tsConfigFilePath: path.join(basicProjectPath, '/tsconfig.json'),
     directory: path.join(basicProjectPath, '/src'),
-    openAIApiKey: process.env.OPENAI_API_KEY ?? '',
   })
 
   const prettyFileTree = await buildFormattedFileTree(
@@ -36,14 +35,12 @@ test('Tiny, basic project', async () => {
   expect(lines).toEqual(['├── helper.ts', '└── index.ts'])
 }, 60000)
 
-// Not enough tokens to run this
 test.skip('Zod', async () => {
   const zodProjectPath = path.join(tempTestProjectsPath, '/zod')
 
   await updateFolderStructure({
     tsConfigFilePath: path.join(zodProjectPath, '/tsconfig.json'),
     directory: path.join(zodProjectPath, '/src'),
-    openAIApiKey: process.env.OPENAI_API_KEY ?? '',
   })
 
   const prettyFileTree = await buildFormattedFileTree(
@@ -54,4 +51,42 @@ test.skip('Zod', async () => {
 
   // This feels a bit brittle - need to change to assert against better structured data, like dep graph
   expect(lines).toEqual(['├── helper.ts', '└── index.ts'])
-}, 90000)
+}, 20000)
+
+/*
+  OTHER TEST CASES TO ADD (in the form of dep graphs)
+
+  {
+"/test/file-1.ts": [],
+"/test/file-2.ts": [
+"/test/file-1.ts",
+"/test/file-3.ts"
+],
+"/test/nested/file-4.ts": [ "/test/nested/nested/file-5.ts"],
+"/test/nested/nested/file-5.ts": [ "/test/file-3.ts"]
+}
+
+---
+
+{
+"/test/file-1.ts": [],
+"/test/file-2.ts": [
+"/test/file-1.ts",
+"/test/file-3.ts"
+],
+"/test/nested/file-4.ts": [ "/test/nested/nested/file-5.ts"],
+"/test/nested/nested/file-5.ts": [ "/test/file-2.ts"]
+}
+
+---
+
+{
+"/test/file-1.ts": [],
+"/test/file-2.ts": [
+"/test/file-1.ts",
+"/test/file-3.ts"
+],
+"/test/nested/file-4.ts": [ "/test/nested/nested/file-5.ts"],
+"/test/nested/nested/file-5.ts": [ "/test/file-1.ts"]
+}
+*/

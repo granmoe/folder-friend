@@ -36,12 +36,11 @@ pnpm install -g folder-friend
 ## Usage
 
 ```sh
-npx folder-friend [--target_dir <path>] [--yolo <boolean>] [--openai_api_key <key>]
+npx folder-friend [--target_dir <path>] [--yolo <boolean>]
 ```
 
 - `--target_dir` (optional): The directory to operate on. Defaults to the current working directory.
 - `--yolo` (optional): If false, the CLI will only print the file operations it would perform without actually performing them. You will then have the option to confirm or cancel the file operations. If true, the changes will be made immediately. Defaults to false.
-- `--openai_api_key` (optional): Your OpenAI API key. If not provided, the OPENAI_API_KEY environment variable will be used.
 
 ## Help
 

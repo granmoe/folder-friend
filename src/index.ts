@@ -9,11 +9,6 @@ const parser = yargs(process.argv.slice(2))
   .help('help')
   .alias('help', 'h')
   .options({
-    openai_api_key: {
-      describe: 'OpenAI API Key - defaults to OPENAI_API_KEY env var',
-      type: 'string',
-      demandOption: false,
-    },
     target_dir: {
       describe:
         'Directory to optimize; no changes will be made outside of this dir - defaults to current working dir',
@@ -32,20 +27,12 @@ const parser = yargs(process.argv.slice(2))
 const main = async () => {
   const argv = await parser.argv
 
-  const openAIApiKey = argv.openai_api_key ?? process.env.OPENAI_API_KEY
   const targetDir = argv.target_dir ?? process.cwd()
   const yolo = argv.yolo
 
-  if (!openAIApiKey) {
-    console.error(
-      'OpenAI API Key is required. Pass it in as an argument or set OPENAI_API_KEY env var.',
-    )
-    process.exit(1)
-  }
-
   console.log(`Running on directory: ${targetDir}`)
 
-  runCommand(openAIApiKey, targetDir, yolo)
+  runCommand(targetDir, yolo)
     .then(() => {
       console.log('Success!')
       process.exit(0)
@@ -58,14 +45,9 @@ const main = async () => {
 
 main()
 
-async function runCommand(
-  openAIApiKey: string,
-  targetDir: string,
-  yolo: boolean,
-) {
+async function runCommand(targetDir: string, yolo: boolean) {
   if (yolo) {
     await updateFolderStructure({
-      openAIApiKey,
       directory: targetDir,
     })
   } else {

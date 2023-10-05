@@ -19,7 +19,6 @@ test('creates dep graph of a tiny project', async () => {
   const dependencyGraph = buildDependencyGraph(
     basicProject,
     path.resolve(repoPath, '__test-projects/basic-project/src'),
-    path.resolve(repoPath, '__test-projects/basic-project'),
   )
 
   // Strip base repo path to make tests invariant to repo location on various machines
@@ -44,7 +43,6 @@ test('creates dep graph of a medium project', async () => {
   const dependencyGraph = buildDependencyGraph(
     zodProject,
     path.resolve(repoPath, '__test-projects/zod/src'),
-    path.resolve(repoPath, '__test-projects/zod'),
   )
 
   // Strip base repo path to make tests invariant to repo location on various machines
